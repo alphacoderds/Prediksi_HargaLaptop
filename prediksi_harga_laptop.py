@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import altair as alt
+from sklearn.preprocessing import LabelEncoder
 
 # Memuat model prediksi
 model = pickle.load(open('model.sav', 'rb'))
@@ -12,10 +13,17 @@ st.title('Prediksi Harga Laptop')
 # Coba menggunakan encoding 'latin1'
 df1 = pd.read_csv('laptop_price.csv', encoding='latin1')
 
+# Menggunakan LabelEncoder untuk kolom kategori
+label_encoder = LabelEncoder()
+df1['Product'] = label_encoder.fit_transform(df1['Product'])
+df1['Cpu'] = label_encoder.fit_transform(df1['Cpu'])
+df1['Gpu'] = label_encoder.fit_transform(df1['Gpu'])
+df1['OpSys'] = label_encoder.fit_transform(df1['OpSys'])
+
 # Fungsi untuk halaman Deskripsi
 def show_deskripsi():
     st.write("Selamat datang di aplikasi prediksi harga laptop berbasis web.")
-    st.write("<div style='text-align: justify;'>Aplikasi ini menggunakan teknologi <i>Machine Learning</i> untuk memprediksi harga laptop berdasarkan beberapa parameter kunci yang relevan. Dengan memasukkan data seperti <b>Product</b>, <b>Model</b>, <b>Processor</b>, <b>RAM</b>, <b>Storage</b>, <b>Screen Size</b>, dan <b>OpSys</b>, pengguna dapat dengan mudah mendapatkan perkiraan harga laptop yang sesuai dengan spesifikasi tersebut. Model prediksi ini dilatih menggunakan data historis yang mencakup ribuan entri, memastikan akurasi dan keandalan hasil prediksi. Aplikasi ini dirancang untuk membantu pengguna membuat keputusan yang lebih bijak, baik untuk pembelian laptop baru maupun bekas. Dengan antarmuka yang sederhana dan mudah digunakan, aplikasi ini cocok untuk konsumen individu maupun penjual yang ingin memperkirakan harga pasar secara cepat dan efisien. Dengan integrasi teknologi canggih dan data yang luas, aplikasi ini memberikan wawasan yang berguna untuk semua kalangan.</div>", unsafe_allow_html=True)
+    st.write("<div style='text-align: justify;'>Aplikasi ini menggunakan teknologi <i>Machine Learning</i> untuk memprediksi harga laptop berdasarkan beberapa parameter kunci yang relevan. Dengan memasukkan data seperti <b>Product</b>, <b>Model</b>, <b>Processor</b>, <b>RAM</b>, <b>Memory</b>, <b>Gpu</b>, dan <b>OpSys</b>, pengguna dapat dengan mudah mendapatkan perkiraan harga laptop yang sesuai dengan spesifikasi tersebut. Model prediksi ini dilatih menggunakan data historis yang mencakup ribuan entri, memastikan akurasi dan keandalan hasil prediksi. Aplikasi ini dirancang untuk membantu pengguna membuat keputusan yang lebih bijak, baik untuk pembelian laptop baru maupun bekas. Dengan antarmuka yang sederhana dan mudah digunakan, aplikasi ini cocok untuk konsumen individu maupun penjual yang ingin memperkirakan harga pasar secara cepat dan efisien. Dengan integrasi teknologi canggih dan data yang luas, aplikasi ini memberikan wawasan yang berguna untuk semua kalangan.</div>", unsafe_allow_html=True)
     st.write("Sumber data: https://www.kaggle.com/code/ahmedayad20/laptop-price")
     st.write("Dibuat oleh Rahmanda Putri Radisa - 2024")
 
@@ -36,10 +44,10 @@ def show_dataset():
 4 ) **RAM**
    - Kapasitas memori (RAM) laptop, misalnya 4 GB, 8 GB, 16 GB.
   \n(
-5 ) **Storage**
+5 ) **Memory**
    - Jenis dan kapasitas penyimpanan, misalnya SSD 512 GB atau HDD 1 TB.
   \n(
-6 ) **Screen Size**
+6 ) **Gpu**
    - Ukuran layar laptop dalam inci, misalnya 13 inci, 15 inci.
   \n(
 7 ) **Operating System**
@@ -52,32 +60,42 @@ def show_grafik():
     
     # Pastikan kolom 'Product' ada dalam dataframe
     if 'Product' in df1.columns:
-        tab1, tab2, tab3, tab4, tab5 = st.tabs(["Product", "cpu", "RAM", "Storage", "Screen Size"])
+        tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Product", "Cpu", "Ram", "Memory", "Gpu", "ScreenResolution", "OpSys"])
         
         with tab1:
             st.write("Grafik Product")
             chart_product = pd.DataFrame(df1, columns=["Product"])
-            st.bar_chart(chart_product['Product'].value_counts())  # Pastikan 'Product' ada
+            st.bar_chart(chart_product['Product'].value_counts())  
 
         with tab2:
-            st.write("Grafik cpu")
-            chart_cpu = pd.DataFrame(df1, columns=["cpu"])
-            st.bar_chart(chart_cpu['cpu'].value_counts())
+            st.write("Grafik Cpu")
+            chart_cpu = pd.DataFrame(df1, columns=["Cpu"])
+            st.bar_chart(chart_cpu['Cpu'].value_counts())
 
         with tab3:
-            st.write("Grafik RAM")
-            chart_ram = pd.DataFrame(df1, columns=["RAM"])
-            st.bar_chart(chart_ram['RAM'].value_counts())
+            st.write("Grafik Ram")
+            chart_ram = pd.DataFrame(df1, columns=["Ram"])
+            st.bar_chart(chart_ram['Ram'].value_counts())
 
         with tab4:
-            st.write("Grafik Storage")
-            chart_storage = pd.DataFrame(df1, columns=["Storage"])
-            st.bar_chart(chart_storage['Storage'].value_counts())
+            st.write("Grafik Memory")
+            chart_Memory = pd.DataFrame(df1, columns=["Memory"])
+            st.bar_chart(chart_Memory['Memory'].value_counts())
 
         with tab5:
-            st.write("Grafik Screen Size")
-            chart_screensize = pd.DataFrame(df1, columns=["Screen Size"])
-            st.bar_chart(chart_screensize['Screen Size'].value_counts())
+            st.write("Grafik Gpu")
+            chart_screensize = pd.DataFrame(df1, columns=["Gpu"])
+            st.bar_chart(chart_screensize['Gpu'].value_counts())
+
+        with tab6:
+            st.write("Grafik ScreenResolution")
+            chart_screensize = pd.DataFrame(df1, columns=["ScreenResolution"])
+            st.bar_chart(chart_screensize['ScreenResolution'].value_counts())
+
+        with tab7:
+            st.write("Grafik OpSys")
+            chart_screensize = pd.DataFrame(df1, columns=["OpSys"])
+            st.bar_chart(chart_screensize['OpSys'].value_counts())
     else:
         st.error("Kolom 'Product' tidak ditemukan dalam dataset.")
 
@@ -87,18 +105,14 @@ def show_prediksi():
     st.write("Masukkan spesifikasi laptop untuk memprediksi harga:")
 
     # Input untuk spesifikasi laptop
-    product = st.selectbox('Product', df1['Product'].unique())  #
-    cpu = st.selectbox('Cpu', df1['Cpu'].unique())
-    ram = st.slider('RAM (GB):', 4, 64, 8)
-    storage = st.slider('Storage (GB):', 128, 2048, 512)
-    screen_size = st.slider('Screen Size (inch):', 10, 20, 15)
-    OpSys = st.selectbox('OpSys', df1['OpSys'].unique()) 
-
+    Cpu = st.selectbox('Cpu', df1['Cpu'].unique())
+    Ram = st.slider('Ram (GB):', 4, 64, 8)
 
     # Prediksi harga laptop berdasarkan input
     if st.button('Prediksi'):
-        input_data = [[product, cpu, ram, storage, screen_size, OpSys]]
-        harga_prediksi = model.predict(input_data)
+        # Input data hanya sesuai fitur yang digunakan
+        input_data = [[Cpu, Ram]]
+        harga_prediksi = model.predict(input_data)  # Prediksi dengan model
         st.write(f'Perkiraan harga laptop: Rp {harga_prediksi[0]:,.2f}')
 
 # Menampilkan menu di sidebar
