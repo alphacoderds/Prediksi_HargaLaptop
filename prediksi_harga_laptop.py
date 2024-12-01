@@ -23,7 +23,7 @@ df1['OpSys'] = label_encoder.fit_transform(df1['OpSys'])
 # Fungsi untuk halaman Deskripsi
 def show_deskripsi():
     st.write("Selamat datang di aplikasi prediksi harga laptop berbasis web.")
-    st.write("<div style='text-align: justify;'>Aplikasi ini menggunakan teknologi <i>Machine Learning</i> untuk memprediksi harga laptop berdasarkan beberapa parameter kunci yang relevan. Dengan memasukkan data seperti <b>Product</b>, <b>Model</b>, <b>Processor</b>, <b>RAM</b>, <b>Memory</b>, <b>Gpu</b>, dan <b>OpSys</b>, pengguna dapat dengan mudah mendapatkan perkiraan harga laptop yang sesuai dengan spesifikasi tersebut. Model prediksi ini dilatih menggunakan data historis yang mencakup ribuan entri, memastikan akurasi dan keandalan hasil prediksi. Aplikasi ini dirancang untuk membantu pengguna membuat keputusan yang lebih bijak, baik untuk pembelian laptop baru maupun bekas. Dengan antarmuka yang sederhana dan mudah digunakan, aplikasi ini cocok untuk konsumen individu maupun penjual yang ingin memperkirakan harga pasar secara cepat dan efisien. Dengan integrasi teknologi canggih dan data yang luas, aplikasi ini memberikan wawasan yang berguna untuk semua kalangan.</div>", unsafe_allow_html=True)
+    st.write("<div style='text-align: justify;'>Aplikasi ini menggunakan teknologi <i>Machine Learning</i> untuk memprediksi harga laptop berdasarkan beberapa parameter kunci yang relevan. Dengan memasukkan data seperti <b>Product</b>, <b>Cpu</b>, <b>Gpu</b>, <b>OpSys</b>, <b>RAM</b>,dan <b>Memory</b>, pengguna dapat dengan mudah mendapatkan perkiraan harga laptop yang sesuai dengan spesifikasi tersebut. Model prediksi ini dilatih menggunakan data historis yang mencakup ribuan entri, memastikan akurasi dan keandalan hasil prediksi. Aplikasi ini dirancang untuk membantu pengguna membuat keputusan yang lebih bijak, baik untuk pembelian laptop baru maupun bekas. Dengan antarmuka yang sederhana dan mudah digunakan, aplikasi ini cocok untuk konsumen individu maupun penjual yang ingin memperkirakan harga pasar secara cepat dan efisien. Dengan integrasi teknologi canggih dan data yang luas, aplikasi ini memberikan wawasan yang berguna untuk semua kalangan.</div>", unsafe_allow_html=True)
     st.write("Sumber data: https://www.kaggle.com/code/ahmedayad20/laptop-price")
     st.write("Dibuat oleh Rahmanda Putri Radisa - 2024")
 
@@ -99,22 +99,46 @@ def show_grafik():
     else:
         st.error("Kolom 'Product' tidak ditemukan dalam dataset.")
 
+from sklearn.preprocessing import LabelEncoder
+
+# Fungsi untuk melakukan pengecekan label
+def safe_encode(label_encoder, value):
+    if value in label_encoder.classes_:
+        return label_encoder.transform([value])[0]
+    else:
+        # Jika label tidak ada, kembalikan nilai default, misalnya -1
+        return -1
+
 # Fungsi untuk halaman Prediksi
 def show_prediksi():
     st.header("Prediksi Harga Laptop")
     st.write("Masukkan spesifikasi laptop untuk memprediksi harga:")
 
     # Input untuk spesifikasi laptop
+    Product = st.selectbox('Product', df1['Product'].unique())
     Cpu = st.selectbox('Cpu', df1['Cpu'].unique())
+    Gpu = st.selectbox('Gpu', df1['Gpu'].unique())
+    OpSys = st.selectbox('OpSys', df1['OpSys'].unique())
     Ram = st.slider('Ram (GB):', 4, 64, 8)
+    Memory = st.selectbox('Memory', df1['Memory'].unique())
 
     # Prediksi harga laptop berdasarkan input
     if st.button('Prediksi'):
-        # Input data hanya sesuai fitur yang digunakan
-        input_data = [[Cpu, Ram]]
-        harga_prediksi = model.predict(input_data)  # Prediksi dengan model
+        # Encode input data menggunakan safe_encode
+        input_data = [[
+            safe_encode(label_encoder, Product),  # Encode Product
+            safe_encode(label_encoder, Cpu),      # Encode Cpu dengan pengecekan
+            safe_encode(label_encoder, Gpu),      # Encode Gpu dengan pengecekan
+            safe_encode(label_encoder, OpSys),    # Encode OpSys dengan pengecekan
+            Ram,                                  # Ram tetap sebagai angka
+            safe_encode(label_encoder, Memory)    # Encode Memory dengan pengecekan
+        ]]
+        
+        # Prediksi dengan model
+        harga_prediksi = model.predict(input_data)
         st.write(f'Perkiraan harga laptop: Rp {harga_prediksi[0]:,.2f}')
 
+    
 # Menampilkan menu di sidebar
 add_selectbox = st.sidebar.selectbox(
     "PILIH MENU",
